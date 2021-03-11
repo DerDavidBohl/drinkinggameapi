@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -18,40 +19,35 @@ public class GameController implements GameControllerApi {
     @Autowired
     private GameService gameService;
 
-    @GetMapping
     @Override
-    public List<Game> getGames() {
-        return gameService.getAllGames();
-    }
-
-    @PostMapping
-    @Override
-    public Game postGame(@RequestBody Game game) {
-        return gameService.createNewGame(game);
-    }
-
-    @PutMapping("/{gameId}")
-    @Override
-    public Game putGame(@RequestParam String gameId, @RequestBody Game game) {
-        return gameService.updateGame(gameId, game);
+    public ResponseEntity<List<Game>> getGames(List<String> tags) {
+        return ResponseEntity.ok(gameService.getAllGames(tags));
     }
 
     @Override
-    @GetMapping("/{gameId}")
-    public Game getGame(@RequestParam String gameId) {
-        return gameService.getGameById(gameId);
+    public ResponseEntity<Game> postGame(Game game) {
+        return new ResponseEntity(gameService.createNewGame(game), HttpStatus.CREATED);
     }
 
     @Override
-    @GetMapping("/random")
-    public Game getRandomGame() {
-        return gameService.getRandomGame();
+    public ResponseEntity<Game> putGame(String gameId, Game game) {
+        return ResponseEntity.ok(gameService.updateGame(gameId, game));
     }
 
     @Override
-    @DeleteMapping("/{gameId}")
-    public void deleteGame(@RequestParam String gameId) {
+    public ResponseEntity<Game> getGame(String gameId) {
+        return ResponseEntity.ok(gameService.getGameById(gameId));
+    }
+
+    @Override
+    public ResponseEntity<Game> getRandomGame(List<String> tags) {
+        return ResponseEntity.ok(gameService.getRandomGame(tags));
+    }
+
+    @Override
+    public ResponseEntity deleteGame(String gameId) {
         gameService.deleteGameById(gameId);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
 

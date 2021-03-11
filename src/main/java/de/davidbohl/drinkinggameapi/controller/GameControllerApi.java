@@ -1,19 +1,28 @@
 package de.davidbohl.drinkinggameapi.controller;
 
 import de.davidbohl.drinkinggameapi.controller.model.Game;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 public interface GameControllerApi {
-    List<Game> getGames();
 
-    Game postGame(Game inputGame);
+    @GetMapping
+    ResponseEntity<List<Game>> getGames(@RequestParam(required = false) List<String> tags);
 
-    Game putGame(String gameId, Game game);
+    @PostMapping
+    ResponseEntity<Game> postGame(@RequestBody Game inputGame);
 
-    Game getGame(String gameId);
+    @PutMapping("/{gameId}")
+    ResponseEntity<Game> putGame(@RequestParam String gameId, @RequestBody Game game);
 
-    Game getRandomGame();
+    @GetMapping("/{gameId")
+    ResponseEntity<Game> getGame(@RequestParam String gameId);
 
-    void deleteGame(String gameId);
+    @GetMapping("/random")
+    ResponseEntity<Game> getRandomGame(@RequestParam(required = false) List<String> tags);
+
+    @DeleteMapping("/{gameId}")
+    ResponseEntity deleteGame(@RequestParam String gameId);
 }

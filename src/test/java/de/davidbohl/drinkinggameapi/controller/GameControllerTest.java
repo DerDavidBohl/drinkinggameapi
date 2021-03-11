@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,9 +41,9 @@ public class GameControllerTest {
         g2.setTitle(GAME2_TITLE);
         returnedGames.add(g2);
 
-        when(gameServiceMock.getAllGames()).thenReturn(returnedGames);
+        when(gameServiceMock.getAllGames(null)).thenReturn(returnedGames);
 
-        var games = gameController.getGames();
+        List<Game> games = gameController.getGames(null).getBody();
 
         Assertions.assertEquals(2, games.size());
         Assertions.assertEquals(GAME1_TITLE, games.get(0).getTitle());
@@ -57,7 +58,7 @@ public class GameControllerTest {
         Game createdGame = new Game(new ObjectId().toString(), inputGame.getTitle(), inputGame.getDescription());
 
         when(gameServiceMock.createNewGame(inputGame)).thenReturn(createdGame);
-        Game answer = gameController.postGame(inputGame);
+        Game answer = gameController.postGame(inputGame).getBody();
 
         Assertions.assertEquals(createdGame, answer);
     }
@@ -69,7 +70,7 @@ public class GameControllerTest {
         Game updatedGame = new Game(gameId, inputGame.getTitle(), inputGame.getDescription());
 
         when(gameServiceMock.updateGame(gameId, inputGame)).thenReturn(updatedGame);
-        Game answer = gameController.putGame(gameId, inputGame);
+        Game answer = gameController.putGame(gameId, inputGame).getBody();
 
         Assertions.assertEquals(updatedGame, answer);
     }
@@ -82,7 +83,7 @@ public class GameControllerTest {
 
         when(gameServiceMock.getGameById(gameId)).thenReturn(gameFromService);
 
-        Game answer = gameController.getGame(gameId);
+        Game answer = gameController.getGame(gameId).getBody();
 
         Assertions.assertEquals(gameFromService, answer);
     }
@@ -101,10 +102,48 @@ public class GameControllerTest {
 
         Game gameFromService = new Game(new ObjectId().toString(), "Mein Spiel", "Das ist mein Spiel!");
 
-        when(gameServiceMock.getRandomGame()).thenReturn(gameFromService);
+        when(gameServiceMock.getRandomGame(null)).thenReturn(gameFromService);
 
-        Game answer = gameController.getRandomGame();
+        Game answer = gameController.getRandomGame(null).getBody();
 
         Assertions.assertEquals(gameFromService, answer);
+    }
+
+    @Test
+    void getRandomGame_should_call_getRandom_from_service_with_filterTags() {
+
+        List<String> tags = new ArrayList<>();
+
+        tags.add("Test Tag 1");
+        tags.add("Test Tag 2");
+        tags.add("Test Tag 3");
+        tags.add("Test Tag 4");
+
+        Game gameFromService = new Game(new ObjectId().toString(), "Mein Spiel", "Das ist mein Spiel!", tags);
+
+        when(gameServiceMock.getRandomGame(tags)).thenReturn(gameFromService);
+
+        Game answer = gameController.getRandomGame(tags).getBody();
+
+        Assertions.assertEquals(gameFromService, answer);
+    }
+
+    @Test
+    void getGames_should_return_filtered_list_when_tags_are_given() {
+
+        List<String> filterTags = new ArrayList<>();
+        filterTags.add("Spaß");
+
+        List<Game> gamesFromService = new ArrayList<>();
+        Game game1 = new Game(new ObjectId().toString(), "Title1", "Spaßiges Spiel", filterTags);
+        Game game2 = new Game(new ObjectId().toString(), "Title2", "Spaßiges Spiel", filterTags);
+        gamesFromService.add(game1);
+        gamesFromService.add(game2);
+
+        when(gameServiceMock.getAllGames(filterTags)).thenReturn(gamesFromService);
+
+        List<Game> answer = gameController.getGames(filterTags).getBody();
+
+        Assertions.assertEquals(2, answer.size());
     }
 }

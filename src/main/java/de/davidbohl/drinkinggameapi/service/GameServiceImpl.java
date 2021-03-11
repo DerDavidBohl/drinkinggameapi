@@ -5,6 +5,7 @@ import de.davidbohl.drinkinggameapi.repository.GameRepository;
 import de.davidbohl.drinkinggameapi.repository.entity.GameEntity;
 import de.davidbohl.drinkinggameapi.service.exception.GameNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,18 +21,27 @@ public class GameServiceImpl implements GameService {
     RandomnessService randomnessService;
 
     @Override
-    public List<Game> getAllGames() {
-        return gameRepository.findAll().stream()
+    public List<Game> getAllGames(List<String> filterTags) {
+
+        List<GameEntity> gameEntities;
+
+        if(filterTags == null || filterTags.size() < 1) {
+            gameEntities = gameRepository.findAll();
+        } else {
+            gameEntities = gameRepository.findByTagsIn(filterTags);
+        }
+
+        return gameEntities.stream()
                 .map(this::mapGameEntityToGame)
                 .collect(Collectors.toList());
     }
 
     private Game mapGameEntityToGame(GameEntity gameEntity) {
-        return new Game(gameEntity.getId(), gameEntity.getTitle(), gameEntity.getDescription());
+        return new Game(gameEntity.getId(), gameEntity.getTitle(), gameEntity.getDescription(), gameEntity.getTags());
     }
 
     private GameEntity mapGameToGameEntity(Game game) {
-        return new GameEntity(game.getId(), game.getTitle(), game.getDescription());
+        return new GameEntity(game.getId(), game.getTitle(), game.getDescription(), game.getTags());
     }
 
     @Override
@@ -45,7 +55,7 @@ public class GameServiceImpl implements GameService {
 
         Optional<GameEntity> foundGame = gameRepository.findById(gameId);
         if(foundGame.isEmpty()) {
-            throw new GameNotFoundException(gameId.toString());
+            throw new GameNotFoundException(gameId);
         }
 
         game.setId(foundGame.get().getId());
@@ -75,8 +85,15 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public Game getRandomGame() {
-        List<GameEntity> allGames = gameRepository.findAll();
-        return mapGameEntityToGame(allGames.get(randomnessService.getRandomInt(allGames.size())));
+    public Game getRandomGame(List<String> filterTags) {
+
+        List<GameEntity> gameEntities;
+
+        if(filterTags == null || filterTags.size() < 1) {
+            gameEntities = gameRepository.findAll();
+        } else {
+            gameEntities = gameRepository.findByTagsIn(filterTags);
+        }
+        return mapGameEntityToGame(gameEntities.get(randomnessService.getRandomInt(gameEntities.size())));
     }
 }
