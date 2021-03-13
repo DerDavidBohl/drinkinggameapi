@@ -17,4 +17,6 @@ public interface GameService {
     void deleteGameById(String gameId);
 
     Game getRandomGame(List<String> filterTags);
+
+    List<String> getAllTags(String searchPhrase);
 }

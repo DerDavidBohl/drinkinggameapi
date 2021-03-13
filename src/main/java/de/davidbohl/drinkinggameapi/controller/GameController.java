@@ -1,5 +1,6 @@
 package de.davidbohl.drinkinggameapi.controller;
 
+import de.davidbohl.drinkinggameapi.config.DrinkingGameApiConfig;
 import de.davidbohl.drinkinggameapi.controller.model.Error;
 import de.davidbohl.drinkinggameapi.controller.model.Game;
 import de.davidbohl.drinkinggameapi.service.GameService;
@@ -13,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/games")
 public class GameController implements GameControllerApi {
 
     @Autowired

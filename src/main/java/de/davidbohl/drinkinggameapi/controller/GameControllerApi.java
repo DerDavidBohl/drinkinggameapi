@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RequestMapping("/api/v1/games")
 public interface GameControllerApi {
 
     @GetMapping
@@ -15,14 +16,14 @@ public interface GameControllerApi {
     ResponseEntity<Game> postGame(@RequestBody Game inputGame);
 
     @PutMapping("/{gameId}")
-    ResponseEntity<Game> putGame(@RequestParam String gameId, @RequestBody Game game);
+    ResponseEntity<Game> putGame(@PathVariable String gameId, @RequestBody Game game);
 
-    @GetMapping("/{gameId")
-    ResponseEntity<Game> getGame(@RequestParam String gameId);
+    @GetMapping("/{gameId}")
+    ResponseEntity<Game> getGame(@PathVariable String gameId);
 
     @GetMapping("/random")
     ResponseEntity<Game> getRandomGame(@RequestParam(required = false) List<String> tags);
 
     @DeleteMapping("/{gameId}")
-    ResponseEntity deleteGame(@RequestParam String gameId);
+    ResponseEntity deleteGame(@PathVariable String gameId);
 }

@@ -48,8 +48,8 @@ public class GameServiceImplTest {
         List<Game> games = gameService.getAllGames(null);
 
         assertEquals(2, games.size());
-        assertTrue(games.stream().anyMatch(game -> game.getTitle() == ge1.getTitle()));
-        assertTrue(games.stream().anyMatch(game -> game.getDescription() == ge1.getDescription()));
+        assertTrue(games.stream().anyMatch(game -> game.getTitle().equals(ge1.getTitle())));
+        assertTrue(games.stream().anyMatch(game -> game.getDescription().equals(ge1.getDescription())));
     }
 
     @Test
@@ -204,6 +204,47 @@ public class GameServiceImplTest {
         assertEquals(3, answer.size());
         assertTrue(answer.stream().allMatch(game -> game.getTags().contains("test")));
     }
+
+    @Test
+    void getAllTags_should_return_correct_list_size() {
+
+        List<GameEntity> allGameEntities = new ArrayList<>();
+
+        GameEntity ge1 = getGameEntity("G1", "Game 1", createTagList("test", "third"));
+        GameEntity ge2 = getGameEntity("G2", "Game 2", createTagList( "Bla"));
+
+        allGameEntities.add(ge1);
+        allGameEntities.add(ge2);
+
+        when(gameRepositoryMock.findAll()).thenReturn(allGameEntities);
+
+        List<String> answer = gameService.getAllTags(null);
+
+        assertEquals(3, answer.size());
+    }
+
+    @Test
+    void getAllTags_should_return_correct_list_size_for_given_searchPhrase() {
+
+        List<GameEntity> allGameEntities = new ArrayList<>();
+
+        GameEntity ge1 = getGameEntity("G1", "Game 1", createTagList("test", "third", "Bla"));
+        GameEntity ge2 = getGameEntity("G2", "Game 2", createTagList( "Bla", "Thirst"));
+
+        allGameEntities.add(ge1);
+        allGameEntities.add(ge2);
+
+        when(gameRepositoryMock.findAll()).thenReturn(allGameEntities);
+
+        List<String> answer = gameService.getAllTags("thir");
+
+        assertEquals(2, answer.size());
+        assertTrue(answer.contains("third"));
+        assertTrue(answer.contains("Thirst"));
+    }
+
+
+
     private List<String> createTagList(String... tags) {
         return Arrays.asList(tags.clone());
     }

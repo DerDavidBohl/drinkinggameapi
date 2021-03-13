@@ -8,9 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class GameServiceImpl implements GameService {
@@ -25,7 +27,7 @@ public class GameServiceImpl implements GameService {
 
         List<GameEntity> gameEntities;
 
-        if(filterTags == null || filterTags.size() < 1) {
+        if (filterTags == null || filterTags.size() < 1) {
             gameEntities = gameRepository.findAll();
         } else {
             gameEntities = gameRepository.findByTagsIn(filterTags);
@@ -54,7 +56,7 @@ public class GameServiceImpl implements GameService {
     public Game updateGame(String gameId, Game game) {
 
         Optional<GameEntity> foundGame = gameRepository.findById(gameId);
-        if(foundGame.isEmpty()) {
+        if (foundGame.isEmpty()) {
             throw new GameNotFoundException(gameId);
         }
 
@@ -67,7 +69,7 @@ public class GameServiceImpl implements GameService {
     public Game getGameById(String gameId) {
         Optional<GameEntity> gameEntityOptional = gameRepository.findById(gameId);
 
-        if(gameEntityOptional.isEmpty()) {
+        if (gameEntityOptional.isEmpty()) {
             throw new GameNotFoundException(gameId);
         }
 
@@ -89,11 +91,23 @@ public class GameServiceImpl implements GameService {
 
         List<GameEntity> gameEntities;
 
-        if(filterTags == null || filterTags.size() < 1) {
+        if (filterTags == null || filterTags.size() < 1) {
             gameEntities = gameRepository.findAll();
         } else {
             gameEntities = gameRepository.findByTagsIn(filterTags);
         }
         return mapGameEntityToGame(gameEntities.get(randomnessService.getRandomInt(gameEntities.size())));
+    }
+
+    @Override
+    public List<String> getAllTags(String searchPhrase) {
+
+        List<String> tags = gameRepository.findAll().stream()
+                .flatMap(game -> game.getTags().stream())
+                .filter(tag -> (searchPhrase == null || tag.toLowerCase().contains(searchPhrase.toLowerCase())))
+                .distinct()
+                .collect(Collectors.toList());
+        
+        return tags;
     }
 }
